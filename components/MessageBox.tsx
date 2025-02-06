@@ -1,55 +1,102 @@
+import Image from "next/image";
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import remarkGfm from "remark-gfm";
+import { Copy } from "lucide-react"; // For copy button icon
 
 type Props = {
   index: number;
   msg: {
-    sender: string;
-    text: string;
+    role: string;
+    message: string;
+    isTyping?: boolean; // Added typing indicator support
   };
 };
 
 const MessageBox = ({ index, msg }: Props) => {
-  const ui = (
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (message: string) => {
+    navigator.clipboard.writeText(message);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
     <div
       key={index}
       className={`flex ${
-        msg.sender === "user" ? "justify-end" : "justify-start"
+        msg.role === "user" ? "justify-end" : "justify-start"
       } items-start space-x-2`}
     >
-      {msg.sender == "bot" ? (
-        <div className=" border-black border-2 w-10 h-10 rounded-full overflow-hidden flex justify-center items-center">
-          <img
-            src={"/bot.svg"}
+      {/* Bot Avatar */}
+      {msg.role === "bot" && (
+        <div className="border-black border-2 w-10 h-10 rounded-full overflow-hidden flex justify-center items-center">
+          <Image
+            src="/bot.svg"
+            width={32}
+            height={32}
             alt="Profile"
-            className="w-6 h-6 object-contain"
+            className="object-contain"
           />
         </div>
-      ) : (
-        ""
       )}
+
+      {/* Message Box */}
       <div
-        className={`p-3 rounded-lg max-w-xs `}
+        className={`p-3 rounded-lg max-w-xl markdown`} // Increased width
         style={{
-          backgroundColor: msg.sender == "user" ? "#EB5A3C" : "#155E95",
-          color: msg.sender == "user" ? "#FBF5E5" : "#D9EAFD",
+          backgroundColor: msg.role === "user" ? "#EB5A3C" : "#155E95",
+          color: msg.role === "user" ? "#FBF5E5" : "#D9EAFD",
         }}
       >
-        <ReactMarkdown>{msg.text}</ReactMarkdown>
+        {/* AI Typing Animation */}
+        {msg.isTyping ? (
+          <div className="text-gray-400 text-sm animate-pulse">AI is typing...</div>
+        ) : (
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
+            components={{
+              code({ node, inline, className, children, ...props }) {
+                const codeText = String(children).trim();
+                if (inline) {
+                  return <code className="bg-gray-700 px-2 py-1 rounded">{codeText}</code>;
+                }
+                return (
+                  <div className="relative">
+                    <button
+                      className="absolute top-2 right-2 text-gray-300 hover:text-white"
+                      onClick={() => handleCopy(codeText)}
+                    >
+                      <Copy size={16} />
+                    </button>
+                    <pre className="p-3 rounded-lg overflow-x-auto bg-black text-white">{children}</pre>
+                  </div>
+                );
+              },
+            }}
+          >
+            {msg.message}
+          </ReactMarkdown>
+        )}
       </div>
-      {msg.sender == "user" ? (
+
+      {/* User Avatar */}
+      {msg.role === "user" && (
         <div className="w-10 h-10 rounded-full overflow-hidden">
-          <img
-            src={"/user.svg"}
+          <Image
+            src="/user.svg"
+            width={32}
+            height={32}
             alt="Profile"
-            className="w-full h-full object-cover"
+            className="object-contain"
           />
         </div>
-      ) : (
-        ""
       )}
     </div>
   );
-  return ui;
 };
 
 export default MessageBox;
