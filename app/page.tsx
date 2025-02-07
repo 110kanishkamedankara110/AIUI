@@ -8,6 +8,7 @@ import LottieLoader from "@/components/Runner";
 import axios from "axios";
 import Nothing from "@/components/Nothing";
 import Image from "next/image";
+import { json } from "stream/consumers";
 export default function Home() {
   const [messages, setMessages] = useState<
     {
@@ -16,7 +17,6 @@ export default function Home() {
     }[]
   >([]);
   const [loading, setLoading] = useState(false);
-  const [value, setValue] = useState("");
   return (
     <div className="w-full flex flex-col">
       <div className="flex-1 space-y-4 px-4 py-2">
@@ -60,21 +60,26 @@ export default function Home() {
               top: document.documentElement.scrollHeight,
               behavior: "smooth",
             });
-            axios
-              .post("http://127.0.0.1:5000/ask", data)
-              .then((response) => {
+            fetch(`https://bot.hellodynamicbiz.com/ask`, {
+              body:JSON.stringify(data),
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json", // Ensure proper content type
+              },
+            })
+              .then((response) => response.text()) // Convert response to text
+              .then((text) => {
                 setMessages((prevMessages) => [
                   ...prevMessages,
                   {
                     role: "bot",
-                    message: response.data,
+                    message: text, // Use the resolved text
                   },
                 ]);
                 window.scrollTo({
                   top: document.documentElement.scrollHeight,
                   behavior: "smooth",
                 });
-                
               })
               .catch((error) => {
                 console.error("Error sending request:", error);
@@ -82,14 +87,14 @@ export default function Home() {
                   ...prevMessages,
                   {
                     role: "bot",
-                    message: `Error Occured Plese Try Again Later : ${error}`,
+                    message: `Error Occurred. Please Try Again Later: ${error.message}`,
                   },
                 ]);
               })
               .finally(() => {
-                query = "";
                 setLoading(false);
               });
+            
           }}
         />
       </div>

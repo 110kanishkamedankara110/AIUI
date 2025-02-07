@@ -7,9 +7,6 @@ import Listening from "@/components/Listening";
 const SpeechToText = ({ 
     onTranscriptChange, 
     onResetRef 
-}: { 
-    onTranscriptChange: (text: string) => void; 
-    onResetRef: (resetFn: () => void) => void; // Send reset function to parent
 }) => {
     const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
@@ -23,7 +20,6 @@ const SpeechToText = ({
 
     if (!browserSupportsSpeechRecognition) {
         console.log("not supported...")
-        alert("not Supported...")
     }
 
     return (

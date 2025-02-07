@@ -32,11 +32,21 @@ const Input = forwardRef<HTMLInputElement, Props>(({ onSubmit }, ref) => {
 
     const animateButton = (button: HTMLImageElement) => {
       button.addEventListener("mouseover", () => {
-        gsap.to(button, { rotation: 15, scale: 1.2, duration: 0.3, ease: "bounce.out" });
+        gsap.to(button, {
+          rotation: 15,
+          scale: 1.2,
+          duration: 0.3,
+          ease: "bounce.out",
+        });
       });
 
       button.addEventListener("mouseout", () => {
-        gsap.to(button, { rotation: 0, scale: 1, duration: 0.3, ease: "bounce.out" });
+        gsap.to(button, {
+          rotation: 0,
+          scale: 1,
+          duration: 0.3,
+          ease: "bounce.out",
+        });
       });
     };
 
@@ -46,7 +56,9 @@ const Input = forwardRef<HTMLInputElement, Props>(({ onSubmit }, ref) => {
 
   const handleTranscriptChange = (text: string) => {
     if (inputRef.current) {
-      inputRef.current.value = text;
+      if (inputRef.current.value == "") {
+        inputRef.current.value = text;
+      }
     }
   };
 
@@ -62,19 +74,29 @@ const Input = forwardRef<HTMLInputElement, Props>(({ onSubmit }, ref) => {
       className="flex w-full h-[60px] lg:h-[50px] rounded-lg border-black border-2 items-center px-4 md:px-3"
     >
       <input
+        id="inp"
         ref={(el) => {
           inputRef.current = el;
           if (typeof ref === "function") {
             ref(el);
           } else if (ref) {
-            (ref as React.MutableRefObject<HTMLInputElement | null>).current = el;
+            (ref as React.MutableRefObject<HTMLInputElement | null>).current =
+              el;
           }
         }}
         type="text"
         onKeyDown={(e) => {
           const value = inputRef.current?.value;
           if (value && e.key === "Enter") {
-            onSubmit(value);
+            if (inputRef.current) {
+              inputRef.current.value = "";
+            }
+            const ele = document.getElementById("inp") as HTMLInputElement;
+            ele.value = "";
+            if (value) {
+              onSubmit(value);
+              handleReset();
+            }
           }
         }}
         placeholder="Type a message"
@@ -82,18 +104,20 @@ const Input = forwardRef<HTMLInputElement, Props>(({ onSubmit }, ref) => {
       />
       <div className="flex gap-3 md:gap-2 justify-center items-center">
         <SpeechToText
-          onResetRef={(resetFn) => (resetTranscriptRef.current = resetFn)}
+          onResetRef={(resetFn: any) => (resetTranscriptRef.current = resetFn)}
           onTranscriptChange={handleTranscriptChange}
         />
         <Image
           onClick={() => {
             const value = inputRef.current?.value;
+            if (inputRef.current) {
+              inputRef.current.value = "";
+            }
+            const ele = document.getElementById("inp") as HTMLInputElement;
+            ele.value = "";
             if (value) {
               onSubmit(value);
               handleReset();
-              if (inputRef.current) {
-                inputRef.current.value = "";
-              }
             }
           }}
           width={32}

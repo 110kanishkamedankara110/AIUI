@@ -1,6 +1,6 @@
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
+import { ClassAttributes, HTMLAttributes, useEffect, useRef, useState } from "react";
+import ReactMarkdown, { ExtraProps } from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { Copy } from "lucide-react"; // For copy button icon
@@ -13,7 +13,13 @@ type Props = {
     isTyping?: boolean; // Added typing indicator support
   };
 };
-
+type CodeProps = {
+  node: any;
+  inline: boolean; // Explicitly define `inline` here
+  className: string;
+  children: React.ReactNode;
+  [key: string]: any;
+};
 const MessageBox = ({ index, msg }: Props) => {
   const [copied, setCopied] = useState(false);
 
@@ -39,7 +45,9 @@ const MessageBox = ({ index, msg }: Props) => {
       console.log(voices); // Debugging: See available voices
 
       // Select the preferred female voice
-      const voice = voices.find((v) => /Google UK English Female/i.test(v.name));
+      const voice = voices.find((v) =>
+        /Google UK English Female/i.test(v.name)
+      );
 
       if (voice) {
         utterance.voice = voice;
@@ -124,15 +132,14 @@ const MessageBox = ({ index, msg }: Props) => {
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeHighlight]}
               components={{
-                code({ node, inline, className, children, ...props }) {
+                code({
+                  node,
+                  className,
+                  children,
+                  ...props
+                }:HTMLAttributes<HTMLElement> & ExtraProps & ClassAttributes<HTMLElement>) {
                   const codeText = String(children).trim();
-                  if (inline) {
-                    return (
-                      <code className="bg-gray-700 px-2 py-1 rounded">
-                        {codeText}
-                      </code>
-                    );
-                  }
+                  
                   return (
                     <div className="relative">
                       <button

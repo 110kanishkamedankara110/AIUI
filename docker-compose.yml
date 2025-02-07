@@ -1,0 +1,32 @@
+services:
+  aiui:
+    image: ghcr.io/110kanishkamedankara110/aiui:latest
+    container_name: aiui
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - billy-network
+  billy:
+    image: ghcr.io/110kanishkamedankara110/billy:latest
+    container_name: billy
+    ports:
+      - "5000:5000"
+    networks:
+      - billy-network
+  nginx:
+    container_name: nginx_proxy
+    image: ghcr.io/110kanishkamedankara110/nginx:latest
+    restart: unless-stopped
+    ports:
+      - 8484:8484
+    depends_on:
+      - aiui
+      - billy
+    networks:
+      - billy-network
+networks:
+  billy-network:
+    driver: bridge
