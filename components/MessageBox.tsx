@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
@@ -22,6 +22,49 @@ const MessageBox = ({ index, msg }: Props) => {
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  const ttx = () => {
+    !isSpeaking ? handleSpeak(msg.message) : handleStop();
+  };
+
+  const handleSpeak = (text: string) => {
+    if (!text) return;
+
+    const synth = window.speechSynthesis;
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    const speak = () => {
+      const voices = synth.getVoices();
+      console.log(voices); // Debugging: See available voices
+
+      // Select the preferred female voice
+      const voice = voices.find((v) => /Google UK English Female/i.test(v.name));
+
+      if (voice) {
+        utterance.voice = voice;
+        utterance.pitch = 1.1; // Slightly higher pitch for a more natural tone
+        utterance.rate = 0.9; // Slow down for clarity
+        utterance.volume = 1.0; // Full volume
+      }
+
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+
+      synth.speak(utterance);
+    };
+
+    if (synth.getVoices().length === 0) {
+      synth.onvoiceschanged = speak; // Wait for voices to load
+    } else {
+      speak();
+    }
+  };
+
+  const handleStop = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+  };
 
   return (
     <div
@@ -30,70 +73,117 @@ const MessageBox = ({ index, msg }: Props) => {
         msg.role === "user" ? "justify-end" : "justify-start"
       } items-start space-x-2`}
     >
-      {/* Bot Avatar */}
       {msg.role === "bot" && (
-        <div className="border-black border-2 w-10 h-10 rounded-full overflow-hidden flex justify-center items-center">
+        <div
+          className="cursor-pointer w-6 h-6 aspect-square flex items-center justify-center border-2 border-black"
+          style={{
+            marginRight: "-20px",
+            marginTop: "-10px",
+            zIndex: 999,
+            backgroundColor: "white",
+            borderRadius: "50%",
+          }}
+          onClick={() => ttx()}
+        >
           <Image
-            src="/bot.svg"
-            width={32}
-            height={32}
+            src="/speaker.svg"
+            width={14}
+            height={14}
             alt="Profile"
-            className="object-contain"
+            className="object-contain bottom-0 ml"
           />
         </div>
+      )}
+      {/* Bot Avatar */}
+      {msg.role === "bot" && (
+        <Image
+          src="/bot.svg"
+          width={32}
+          height={32}
+          alt="Profile"
+          className="object-contain border-black border-2 rounded-full"
+        />
       )}
 
       {/* Message Box */}
       <div
         className={`p-3 rounded-lg max-w-xl markdown`} // Increased width
         style={{
-          backgroundColor: msg.role === "user" ? "#EB5A3C" : "#155E95",
-          color: msg.role === "user" ? "#FBF5E5" : "#D9EAFD",
+          backgroundColor: msg.role === "user" ? "#EB5A3C" : "#F5F5F5",
+          color: msg.role === "user" ? "#FBF5E5" : "#4B164C",
         }}
       >
         {/* AI Typing Animation */}
         {msg.isTyping ? (
-          <div className="text-gray-400 text-sm animate-pulse">AI is typing...</div>
+          <div className="text-gray-400 text-sm animate-pulse">
+            AI is typing...
+          </div>
         ) : (
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeHighlight]}
-            components={{
-              code({ node, inline, className, children, ...props }) {
-                const codeText = String(children).trim();
-                if (inline) {
-                  return <code className="bg-gray-700 px-2 py-1 rounded">{codeText}</code>;
-                }
-                return (
-                  <div className="relative">
-                    <button
-                      className="absolute top-2 right-2 text-gray-300 hover:text-white"
-                      onClick={() => handleCopy(codeText)}
-                    >
-                      <Copy size={16} />
-                    </button>
-                    <pre className="p-3 rounded-lg overflow-x-auto bg-black text-white">{children}</pre>
-                  </div>
-                );
-              },
-            }}
-          >
-            {msg.message}
-          </ReactMarkdown>
+          <div>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeHighlight]}
+              components={{
+                code({ node, inline, className, children, ...props }) {
+                  const codeText = String(children).trim();
+                  if (inline) {
+                    return (
+                      <code className="bg-gray-700 px-2 py-1 rounded">
+                        {codeText}
+                      </code>
+                    );
+                  }
+                  return (
+                    <div className="relative">
+                      <button
+                        className="absolute top-2 right-2 text-gray-300 hover:text-white"
+                        onClick={() => handleCopy(codeText)}
+                      >
+                        <Copy size={16} />
+                      </button>
+                      <pre className="p-3 rounded-lg overflow-x-auto bg-black text-white">
+                        {children}
+                      </pre>
+                    </div>
+                  );
+                },
+              }}
+            >
+              {msg.message}
+            </ReactMarkdown>
+          </div>
         )}
       </div>
-
-      {/* User Avatar */}
       {msg.role === "user" && (
-        <div className="w-10 h-10 rounded-full overflow-hidden">
+        <div
+          className="cursor-pointer w-6 h-6 flex items-center justify-center border-2 border-black"
+          style={{
+            marginRight: "-20px",
+            marginTop: "-10px",
+            zIndex: 999,
+            backgroundColor: "white",
+            borderRadius: "50%",
+          }}
+          onClick={() => ttx()}
+        >
           <Image
-            src="/user.svg"
-            width={32}
-            height={32}
+            src="/speaker.svg"
+            width={14}
+            height={14}
             alt="Profile"
-            className="object-contain"
+            className="object-contain bottom-0"
           />
         </div>
+      )}
+      {/* User Avatar */}
+      {msg.role === "user" && (
+        <Image
+          src="/user.svg"
+          width={32}
+          height={32}
+          alt="Profile"
+          className="object-contain"
+        />
       )}
     </div>
   );
