@@ -19,6 +19,62 @@ export default function Home() {
     }[]
   >([]);
   const [loading, setLoading] = useState(false);
+  const onSubmit=(value:string) => {
+    const messageHistory = messages;
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        role: "user",
+        message: value,
+      },
+    ]);
+    let query = value;
+    setLoading(true);
+
+    const data = {
+      query: value,
+      history: messageHistory,
+    };
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: "smooth",
+    });
+    fetch(`https://bot.hellodynamicbiz.com/ask`, {
+      body:JSON.stringify(data),
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", // Ensure proper content type
+      },
+    })
+      .then((response) => response.text()) // Convert response to text
+      .then((text) => {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "bot",
+            message: text, // Use the resolved text
+          },
+        ]);
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: "smooth",
+        });
+      })
+      .catch((error) => {
+        console.error("Error sending request:", error);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "bot",
+            message: `Error Occurred. Please Try Again Later: ${error.message}`,
+          },
+        ]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+    
+  }
   return (
     <div className="w-full flex flex-col">
       <div className="flex-1 space-y-4 px-4 py-2">
@@ -33,7 +89,7 @@ export default function Home() {
             )}
 
             {messages.map((msg, index) => (
-              <MessageBox key={index} msg={msg} index={index} />
+              <MessageBox handleSend={onSubmit}  key={index} msg={msg} index={index} />
             ))}
           </div>
         </div>
@@ -43,62 +99,7 @@ export default function Home() {
         {loading ? <LottieLoader /> : ""}
         
         <Input
-          onSubmit={(value) => {
-            const messageHistory = messages;
-            setMessages((prevMessages) => [
-              ...prevMessages,
-              {
-                role: "user",
-                message: value,
-              },
-            ]);
-            let query = value;
-            setLoading(true);
-
-            const data = {
-              query: value,
-              history: messageHistory,
-            };
-            window.scrollTo({
-              top: document.documentElement.scrollHeight,
-              behavior: "smooth",
-            });
-            fetch(`https://bot.hellodynamicbiz.com/ask`, {
-              body:JSON.stringify(data),
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json", // Ensure proper content type
-              },
-            })
-              .then((response) => response.text()) // Convert response to text
-              .then((text) => {
-                setMessages((prevMessages) => [
-                  ...prevMessages,
-                  {
-                    role: "bot",
-                    message: text, // Use the resolved text
-                  },
-                ]);
-                window.scrollTo({
-                  top: document.documentElement.scrollHeight,
-                  behavior: "smooth",
-                });
-              })
-              .catch((error) => {
-                console.error("Error sending request:", error);
-                setMessages((prevMessages) => [
-                  ...prevMessages,
-                  {
-                    role: "bot",
-                    message: `Error Occurred. Please Try Again Later: ${error.message}`,
-                  },
-                ]);
-              })
-              .finally(() => {
-                setLoading(false);
-              });
-            
-          }}
+          onSubmit={onSubmit}
         />
       </div>
       <div

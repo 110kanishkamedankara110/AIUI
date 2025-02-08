@@ -1,9 +1,17 @@
 import Image from "next/image";
-import { ClassAttributes, HTMLAttributes, useEffect, useRef, useState } from "react";
+import {
+  ClassAttributes,
+  HTMLAttributes,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import ReactMarkdown, { ExtraProps } from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { Copy } from "lucide-react"; // For copy button icon
+import ButtonRemark from "./ButtonRemark";
+import QuestionRemark from "./ButtonRemark";
 
 type Props = {
   index: number;
@@ -12,6 +20,7 @@ type Props = {
     message: string;
     isTyping?: boolean; // Added typing indicator support
   };
+  handleSend: (value: string) => void;
 };
 type CodeProps = {
   node: any;
@@ -20,7 +29,7 @@ type CodeProps = {
   children: React.ReactNode;
   [key: string]: any;
 };
-const MessageBox = ({ index, msg }: Props) => {
+const MessageBox = ({ index, msg, handleSend }: Props) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (message: string) => {
@@ -73,6 +82,27 @@ const MessageBox = ({ index, msg }: Props) => {
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
   };
+
+  const CustomButton = ({ text }: { text: string }) => {
+    return (
+      <button onClick={() => handleSend(text)} className="bg-white text-black p-2 rounded-sm">
+        {text}
+      </button>
+    );
+  };
+
+  const parseCustomButton = (text: string) => {
+    try {
+      const match = text.match(/^:::(.+?):::$/);
+      if (match) {
+        return { text: match[1] };
+      }
+    } catch {
+      return null;
+    }
+  };
+
+  // Markdown components override
 
   return (
     <div
@@ -137,9 +167,11 @@ const MessageBox = ({ index, msg }: Props) => {
                   className,
                   children,
                   ...props
-                }:HTMLAttributes<HTMLElement> & ExtraProps & ClassAttributes<HTMLElement>) {
+                }: HTMLAttributes<HTMLElement> &
+                  ExtraProps &
+                  ClassAttributes<HTMLElement>) {
                   const codeText = String(children).trim();
-                  
+
                   return (
                     <div className="relative">
                       <button
@@ -154,6 +186,13 @@ const MessageBox = ({ index, msg }: Props) => {
                     </div>
                   );
                 },
+                p: ({ children }) => {
+                  const buttonData = parseCustomButton(children as string);
+                  if (buttonData) {
+                    return <CustomButton text={buttonData.text} />
+                  }
+                  return <p>{children}</p>;
+                },
               }}
             >
               {msg.message}
@@ -161,11 +200,22 @@ const MessageBox = ({ index, msg }: Props) => {
           </div>
         )}
       </div>
+      
+      {/* User Avatar */}
+      {msg.role === "user" && (
+        <Image
+          src="/user.svg"
+          width={32}
+          height={32}
+          alt="Profile"
+          className="object-contain  border-black border-2 rounded-full"
+        />
+      )}
       {msg.role === "user" && (
         <div
-          className="cursor-pointer w-6 h-6 flex items-center justify-center border-2 border-black"
+          className="absolute cursor-pointer w-6 h-6 flex items-center justify-center border-2 border-black"
           style={{
-            marginRight: "-20px",
+            marginRight: "-10px",
             marginTop: "-10px",
             zIndex: 999,
             backgroundColor: "white",
@@ -181,16 +231,6 @@ const MessageBox = ({ index, msg }: Props) => {
             className="object-contain bottom-0"
           />
         </div>
-      )}
-      {/* User Avatar */}
-      {msg.role === "user" && (
-        <Image
-          src="/user.svg"
-          width={32}
-          height={32}
-          alt="Profile"
-          className="object-contain"
-        />
       )}
     </div>
   );
