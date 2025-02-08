@@ -5,6 +5,8 @@ import Input from "@/components/Input";
 import { useRef, useState } from "react";
 import MessageBox from "@/components/MessageBox";
 import LottieLoader from "@/components/Runner";
+import Listening2 from "@/components/Listening2";
+
 import axios from "axios";
 import Nothing from "@/components/Nothing";
 import Image from "next/image";
@@ -39,6 +41,7 @@ export default function Home() {
 
       <div className="w-full max-w-lg sm:max-w-xl lg:max-w-2xl fixed bottom-0 left-1/2 transform -translate-x-1/2 p-4">
         {loading ? <LottieLoader /> : ""}
+        
         <Input
           onSubmit={(value) => {
             const messageHistory = messages;

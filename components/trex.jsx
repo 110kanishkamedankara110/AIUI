@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import lottie from "lottie-web";
-import listener from "../public/listening.json"; // Import your Lottie JSON file
+import trex from "../public/trex.json"; // Import your Lottie JSON file
 
-const Listening = ({onClick}) => {
+const Trex = () => {
   useEffect(() => {
     const animation = lottie.loadAnimation({
-      container: document.getElementById("listener"), // The container to render the animation in
-      animationData: listener, // Your Lottie JSON file
+      container: document.getElementById("trex"), // The container to render the animation in
+      animationData: trex, // Your Lottie JSON file
       loop: true, // Animation will loop indefinitely
       autoplay: true,
       renderer: "svg", // or "canvas"
@@ -22,15 +22,12 @@ const Listening = ({onClick}) => {
   }, []);
 
   return <span
-  onClick={onClick}
-  className="ml-2 cursor-pointer"
-  id="listener"
+  className="w-full mb-[-7]"
+  id="trex"
   style={{
-    width: "25px",
-    height: "25px",
     display: "inline-block", // Ensures the container holds dimensions
   }}
 ></span>;
 };
 
-export default Listening;
+export default Trex;

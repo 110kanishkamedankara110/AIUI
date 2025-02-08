@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Billy",
+  title: "Billy-The-Persona-AI-agent-By-Dynamic-Biz",
   description: "Billy-The-Persona-AI-agent-By-Dynamic-Biz",
   icons:{
     icon:[
-      {url:'/1.png'},
+      {url:'/bot.svg'},
     ]
   }
 };
