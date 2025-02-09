@@ -1,5 +1,5 @@
 import Image from "next/image";
-import {
+import React, {
   ClassAttributes,
   HTMLAttributes,
   useEffect,
@@ -85,15 +85,15 @@ const MessageBox = ({ index, msg, handleSend }: Props) => {
 
   const CustomButton = ({ text }: { text: string }) => {
     return (
-      <button onClick={() => handleSend(text)} className="bg-white text-black p-2 rounded-sm">
+      <><button onClick={() => handleSend(text)} className= "w-full bg-blue-100 mt-1 mb-1 text-black p-2 rounded-lg">
         {text}
-      </button>
+      </button><br/></>
     );
   };
 
   const parseCustomButton = (text: string) => {
     try {
-      const match = text.match(/^:::(.+?):::$/);
+      const match = text.match(/;;;(.*?);;;/);
       if (match) {
         return { text: match[1] };
       }
@@ -187,12 +187,39 @@ const MessageBox = ({ index, msg, handleSend }: Props) => {
                   );
                 },
                 p: ({ children }) => {
-                  const buttonData = parseCustomButton(children as string);
-                  if (buttonData) {
-                    return <CustomButton text={buttonData.text} />
-                  }
-                  return <p>{children}</p>;
+                  if (!children) return null; // Handle empty case
+                
+                  const processNode = (node: React.ReactNode): React.ReactNode => {
+                    if (typeof node === "string") {
+                      // Extract `;;;text;;;` patterns
+                      const buttonMatches = [...node.matchAll(/;;;(.*?);;;/g)];
+                
+                      if (buttonMatches.length > 0) {
+                        const buttons = buttonMatches.map((match, index) => (
+                          <CustomButton key={index} text={match[1]} />
+                        ));
+                
+                        // Remove matched patterns from text
+                        const filteredText = node.replace(/;;;.*?;;;/g, "").trim();
+                
+                        return (
+                          <>
+                            {buttons}
+                            {filteredText && <ReactMarkdown>{filteredText}</ReactMarkdown>}
+                          </>
+                        );
+                      }
+                      return <ReactMarkdown>{node}</ReactMarkdown>; // Preserve normal markdown
+                    }
+                    return node; // Return non-string children as is
+                  };
+                
+                  return <>{React.Children.map(children, processNode)}</>;
                 },
+                
+                
+                
+                
               }}
             >
               {msg.message}
