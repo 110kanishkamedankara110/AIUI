@@ -39,7 +39,7 @@ export default function Home() {
       top: document.documentElement.scrollHeight,
       behavior: "smooth",
     });
-    fetch(`http://localhost:5000/ask`, {
+    fetch(`https://bot.hellodynamicbiz.com/ask`, {
       body:JSON.stringify(data),
       method: "POST",
       headers: {
