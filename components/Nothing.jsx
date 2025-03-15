@@ -18,10 +18,10 @@ const Nothing = () => {
   }, []);
 
   return (
-    <>
+    <div>
       <div id="lottie-loader-not" style={{ width: "100%", height: "100%" }}></div>
-      <p className="text-5xl text-gray-500 ">Welcome to Dynamic biz</p>
-    </>
+      <p className="text-5xl text-gray-500 text-center">Welcome to Dynamic biz</p>
+    </div>
   );
 };
 

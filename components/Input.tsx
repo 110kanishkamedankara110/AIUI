@@ -7,9 +7,10 @@ import Listening2 from "./Listening2";
 import Trex from "./trex";
 interface Props {
   onSubmit: (value: string) => void;
+  isOpenSetter:(value:boolean)=>void;
 }
 
-const Input = forwardRef<HTMLInputElement, Props>(({ onSubmit }, ref) => {
+const Input = forwardRef<HTMLInputElement, Props>(({ onSubmit,isOpenSetter }, ref) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const resetTranscriptRef = useRef<(() => void) | null>(null);
@@ -79,7 +80,7 @@ const Input = forwardRef<HTMLInputElement, Props>(({ onSubmit }, ref) => {
           borderWidth: 2,
           borderColor: "#10375c",
         }}
-        className=" flex w-full h-[60px] lg:h-[50px] rounded-lg items-center px-4 md:px-3"
+        className=" flex w-full h-[100px] rounded-lg  flex-col px-4 md:px-3"
       >
         <input
           id="inp"
@@ -97,9 +98,9 @@ const Input = forwardRef<HTMLInputElement, Props>(({ onSubmit }, ref) => {
             const value = inputRef.current?.value;
             if (value == "!trex!") {
               setIsTrex(true);
-              setTimeout(()=>{
+              setTimeout(() => {
                 setIsTrex(false);
-              },1200)
+              }, 1200);
             } else {
               if (value && e.key === "Enter") {
                 if (inputRef.current) {
@@ -126,34 +127,44 @@ const Input = forwardRef<HTMLInputElement, Props>(({ onSubmit }, ref) => {
           placeholder="Type a message"
           className="chat-input h-full placeholder-[#10375C] text-[#10375C] text-base md:text-lg flex-grow bg-transparent outline-none"
         />
-        <div className="flex gap-3 md:gap-2 justify-center items-center">
-          <SpeechToText
-            setListening={setListening}
-            onResetRef={(resetFn: any) =>
-              (resetTranscriptRef.current = resetFn)
-            }
-            onTranscriptChange={handleTranscriptChange}
-          />
-          <Image
-            onClick={() => {
-              const value = inputRef.current?.value;
-              if (inputRef.current) {
-                inputRef.current.value = "";
+        <div className="flex justify-center items-center pb-2">
+          <button
+          onClick={()=>isOpenSetter(true)}
+            style={{ borderWidth: 2, borderColor: "#10375c" }}
+            className="bg-white pl-2 pr-2 text-black-600 rounded-md font-semibold hover:bg-gray-200 transition"
+          >
+            Complain
+          </button>
+          <div className="flex gap-3 md:gap-2 justify-end  w-full pl-4">
+            <SpeechToText
+              setListening={setListening}
+              onResetRef={(resetFn: any) =>
+                (resetTranscriptRef.current = resetFn)
               }
-              const ele = document.getElementById("inp") as HTMLInputElement;
-              ele.value = "";
-              if (value) {
-                onSubmit(value);
-                handleReset();
-              }
-            }}
-            width={32}
-            height={32}
-            src="/send.svg"
-            alt="Send"
-            className="send-btn w-8 h-8 md:w-5 md:h-5 cursor-pointer"
-          />
+              onTranscriptChange={handleTranscriptChange}
+            />
+            <Image
+              onClick={() => {
+                const value = inputRef.current?.value;
+                if (inputRef.current) {
+                  inputRef.current.value = "";
+                }
+                const ele = document.getElementById("inp") as HTMLInputElement;
+                ele.value = "";
+                if (value) {
+                  onSubmit(value);
+                  handleReset();
+                }
+              }}
+              width={32}
+              height={32}
+              src="/send.svg"
+              alt="Send"
+              className="send-btn w-5 h-5 md:w-5 md:h-5 cursor-pointer"
+            />
+          </div>
         </div>
+
       </div>
     </>
   );

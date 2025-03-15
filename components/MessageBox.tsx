@@ -147,8 +147,8 @@ const MessageBox = ({ index, msg, handleSend }: Props) => {
       <div
         className={`p-3 rounded-lg max-w-xl markdown`} // Increased width
         style={{
-          backgroundColor: msg.role === "user" ? "#EB5A3C" : "#F5F5F5",
-          color: msg.role === "user" ? "#FBF5E5" : "#4B164C",
+          backgroundColor: msg.role === "user" ? "#F5F5F5" : "transparent",
+          color: msg.role === "user" ? "#4B164C" : "black",
         }}
       >
         {/* AI Typing Animation */}
